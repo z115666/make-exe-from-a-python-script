@@ -1,0 +1,43 @@
+@echo off
+REM ==================================================================
+REM PLANTILLA build_exe.bat - reutilizable para futuras apps
+REM ==================================================================
+REM Como usarla cada vez:
+REM   1) Copia este archivo a la carpeta de la nueva app.
+REM   2) Cambia SOLO las 3 lineas marcadas mas abajo con "<-- CAMBIAR".
+REM   3) Doble clic. El .exe queda en dist\<NOMBRE_APP>.exe
+REM ==================================================================
+
+REM <-- CAMBIAR: nombre del archivo .py principal de la app
+set ARCHIVO_PY=mi_app_gui.py
+
+REM <-- CAMBIAR: nombre que quieres que tenga el .exe final (sin espacios)
+set NOMBRE_APP=MiApp
+
+REM <-- CAMBIAR: paquetes de pip que necesita ESTA app en concreto.
+REM     customtkinter y pyinstaller casi siempre hacen falta; anade aqui
+REM     lo que uses para hablar con la API que toque, por ejemplo:
+REM       - Microsoft Graph  -> msal requests
+REM       - Google Workspace -> google-api-python-client google-auth
+REM       - Solo lectura de Excel -> openpyxl
+set DEPENDENCIAS=customtkinter pyinstaller
+
+echo === Creando entorno virtual (venv) ===
+python -m venv venv
+call venv\Scripts\activate.bat
+
+echo === Instalando dependencias: %DEPENDENCIAS% ===
+pip install --upgrade pip
+pip install %DEPENDENCIAS%
+
+echo === Generando el ejecutable ===
+REM --collect-all customtkinter es necesario SIEMPRE que la app use
+REM customtkinter (empaqueta sus temas y fuentes internas).
+REM Si la app NO usa customtkinter (por ejemplo, es un script de consola),
+REM puedes quitar esa parte del comando.
+pyinstaller --onefile --windowed --name %NOMBRE_APP% --collect-all customtkinter %ARCHIVO_PY%
+
+echo.
+echo === Listo ===
+echo El ejecutable esta en: dist\%NOMBRE_APP%.exe
+pause
